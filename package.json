@@ -12,5 +12,8 @@
     "mongodb": "^3.5.7",
     "mongoose": "^5.9.12",
     "node-fetch": "^2.6.0"
+  },
+  "scripts": {
+    "start": "node app.js"
   }
 }

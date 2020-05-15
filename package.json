@@ -1,4 +1,9 @@
 {
+  "name": "amq-progress-api",
+  "version": "0.1.0",
+  "engines": {
+    "node": "11.10.1"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",

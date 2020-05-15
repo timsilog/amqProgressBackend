@@ -34,12 +34,10 @@ routes.route('/').get((req, res) => {
 
 routes.route('/user').get(async (req, res) => {
   try {
-    const user = (await (await req.db.collection('users').find({ username: req.params.username })).toArray())[0];
+    const user = (await (await db.collection('users').find({ username: req.query.username })).toArray())[0];
     res.send(user);
   } catch (e) {
-    res.status(500).send({
-      error: e
-    })
+    res.status(500).send({ error: e.message })
   }
 })
 
@@ -65,31 +63,22 @@ routes.route('/updateProgress').post(async (req, res) => {
     if (!song) {
       // couldn't find song, search for it on anilist
       titles = await searchAnilist(req.body.anime);
-      try {
-        const newSong = new Song({
-          songName: req.body.songName,
-          anime: {
-            english: titles.english,
-            romaji: titles.romaji,
-            native: titles.native
-          },
-          songType: req.body.songType,
-          songLink: [req.body.songLink]
-        });
-        song = await newSong.save();
-      } catch (err) {
-        console.error(err);
-        return;
-      }
+      const newSong = new Song({
+        songName: req.body.songName,
+        anime: {
+          english: titles.english,
+          romaji: titles.romaji,
+          native: titles.native
+        },
+        songType: req.body.songType,
+        songLink: [req.body.songLink]
+      });
+      song = await newSong.save();
     }
     // add songlink if new
     if (!song.songLink.includes(req.body.songLink)) {
-      try {
-        song.songLink.push(req.body.songLink);
-        song = song.save();
-      } catch (err) {
-        console.error(err);
-      }
+      song.songLink.push(req.body.songLink);
+      song = song.save();
     }
 
     // update user progress
@@ -123,21 +112,16 @@ routes.route('/updateProgress').post(async (req, res) => {
       }
     }
     progress.save()
-    console.log({
-      user,
-      progress,
-      song
-    })
     res.send({
       user,
       progress,
       song
     })
   } catch (err) {
-    res.status(500).send({ error: err });
+    res.status(500).send({ error: err.message });
   }
 })
 
 app.listen(process.env.PORT, () => {
-  console.log(`Listening on port: ${process.env.PORT}`)
+  // console.log(`Listening on port: ${process.env.PORT}`)
 })

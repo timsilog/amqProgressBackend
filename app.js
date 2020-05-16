@@ -51,7 +51,7 @@ routes.route('/user').get(async (req, res) => {
 } */
 routes.route('/updateProgress').post(async (req, res) => {
   try {
-    console.log('trying');
+    console.log(db);
     // get song, insert if not found
     let song = await Song.findOne({
       $or: [

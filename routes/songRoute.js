@@ -2,11 +2,15 @@ const express = require('express');
 const router = express.Router();
 const Song = require('../models/song');
 
-
-// get all
+// based on offset
+// get 50 songs at a time
+// if no songname is provided just query for all songs
 router.get('/', async (req, res) => {
   try {
-    const songs = await Song.find();
+    const songs = await Song
+      .find(req.query.songName ? { songName: req.query.songName } : {})
+      .limit(50)
+      .skip(req.query.offset ? parseInt(req.query.offset) : 0);
     res.send({ songs });
   } catch (err) {
     res.status(500).send({ error: err });

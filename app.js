@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const songRouter = require('./routes/songRoute');
+const progressRouter = require('./routes/progressRoute');
 const { searchAnilist } = require('./anilist');
 const Song = require('./models/song');
 const User = require('./models/user');
@@ -27,6 +28,7 @@ app.use(cors());
 app.use(helmet());
 app.use('/', routes);
 app.use('/songs', songRouter);
+app.use('/progress', progressRouter);
 
 routes.route('/').get((req, res) => {
   res.send('hello world');
@@ -34,7 +36,8 @@ routes.route('/').get((req, res) => {
 
 routes.route('/user').get(async (req, res) => {
   try {
-    const user = (await (await db.collection('users').find({ username: req.query.username })).toArray())[0];
+    const user = await User.findOne({ username: req.query.username })
+    // const user = (await (await db.collection('users').find({ username: req.query.username })).toArray())[0];
     res.send(user);
   } catch (e) {
     res.status(500).send({ error: e.message })
@@ -68,7 +71,8 @@ routes.route('/updateProgress').post(async (req, res) => {
         anime: {
           english: titles.english,
           romaji: titles.romaji,
-          native: titles.native
+          native: titles.native,
+          amq: req.body.anime
         },
         songType: req.body.songType,
         songLink: [req.body.songLink]

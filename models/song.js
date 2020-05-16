@@ -9,6 +9,7 @@ const songSchema = new mongoose.Schema({
     english: String,
     romaji: String,
     native: String,
+    amq: String,
   },
   songType: {
     type: String,

@@ -1,4 +1,8 @@
+require('dotenv').config()
 const fetch = require("node-fetch");
+const readline = require('readline');
+const mongoose = require('mongoose');
+const Song = require('./models/song');
 
 const searchAnilist = async (anime) => {
   // Here we define our query as a multi-line string
@@ -45,20 +49,39 @@ const searchAnilist = async (anime) => {
     console.error(err);
   }
 }
-// function handleResponse(response) {
-//   return response.json().then(function (json) {
-//     return response.ok ? json : Promise.reject(json);
-//   });
-// }
 
-// function handleData(data) {
-//   console.log(data.data.Media.title);
-//   return data.data.Media.title;
-// }
+const updateSongAnime = async (searchTerm, updateId) => {
+  mongoose.connect(process.env.MONGO_URI,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false
+    });
+  const db = mongoose.connection
+  db.on('error', (error) => console.error(`Db error: ${error}`));
+  // db.once('open', () => console.log('Connected to Database'));
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  const result = await searchAnilist(searchTerm);
+  console.log(result);
+  const song = await Song.findOne({ _id: updateId })
+  console.log(song);
+  rl.question('Continue? Y / N: ', async (res) => {
+    if (res.toLowerCase() === 'y' || res.toLowerCase() === 'yes') {
+      song.anime = result;
+      console.log(song);
+      try {
+        await song.save();
+        console.log('Successfully saved');
+        return;
+      } catch (e) {
+        console.error(`Failed to save: ${e.message}`);
+        return;
+      }
+    }
+  });
+}
 
-// function handleError(error) {
-// alert('Error, check console');
-// console.error(error);
-// }
-
-module.exports = { searchAnilist };
+module.exports = { searchAnilist, updateSongAnime };

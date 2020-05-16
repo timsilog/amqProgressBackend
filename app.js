@@ -51,7 +51,6 @@ routes.route('/user').get(async (req, res) => {
 } */
 routes.route('/updateProgress').post(async (req, res) => {
   try {
-    console.log(db);
     // get song, insert if not found
     let song = await Song.findOne({
       $or: [
@@ -61,7 +60,6 @@ routes.route('/updateProgress').post(async (req, res) => {
       songName: req.body.songName,
       songType: req.body.songType
     });
-    console.log(song);
     if (!song) {
       // couldn't find song, search for it on anilist
       titles = await searchAnilist(req.body.anime);
@@ -75,7 +73,6 @@ routes.route('/updateProgress').post(async (req, res) => {
         songType: req.body.songType,
         songLink: [req.body.songLink]
       });
-      console.log(newSong);
       song = await newSong.save();
     }
     // add songlink if new
@@ -90,7 +87,6 @@ routes.route('/updateProgress').post(async (req, res) => {
       user = new User({ username: req.body.username })
       user.save();
     }
-    console.log(user);
     let progress = await Progress.findOne({ userId: user._id, songId: song._id });
     if (!progress) {
       progress = new Progress({

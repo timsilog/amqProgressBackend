@@ -14,7 +14,8 @@ GET http://localhost:4000/songs?songname=Silver%20and%20Gold%20dance
 
 ###
 
-POST https://serene-temple-88689.herokuapp.com/updateProgress
+# POST https://serene-temple-88689.herokuapp.com/updateProgress
+POST http://localhost:4000/updateProgress
 Content-Type: application/json
 
 {
@@ -25,7 +26,7 @@ Content-Type: application/json
   "songType": "test",
   "username": "test",
   "guess": "test",
-  "isCorrect": true
+  "isCorrect": false
 }
 
 ###

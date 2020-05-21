@@ -16,6 +16,7 @@ const Progress = require('./models/progress');
 mongoose.connect(process.env.MONGO_URI,
   {
     useNewUrlParser: true,
+    useCreateIndex: true,
     useUnifiedTopology: true,
     useFindAndModify: false
   });
@@ -56,51 +57,68 @@ routes.route('/user').get(async (req, res) => {
   songArtist: string,
   guess: string
 } */
+
+const getSong = async (req) => {
+  const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
+  // get song, insert if not found
+  let song = await Song.findOne({ uid: uid });
+  console.log(song);
+  if (!song) {
+    // couldn't find song, search for it on anilist
+    titles = await searchAnilist(req.body.anime);
+    const newSong = new Song({
+      uid,
+      songName: req.body.songName,
+      anime: {
+        english: titles.english,
+        romaji: titles.romaji,
+        native: titles.native,
+        amq1: req.body.anime
+      },
+      songArtist: req.body.songArtist,
+      songType: req.body.songType,
+      songLink: [req.body.songLink]
+    });
+    try {
+      song = await newSong.save();
+    } catch (e) {
+      if (e.code === 11000) {
+        // there was a duplicate
+        console.log('-----------TRYING AGAIN-------------')
+        return getSong();
+      }
+      throw e;
+    }
+  } else {
+    let updated = false;
+    // check for 2nd amq anime title (english or romaji)
+    if (song.anime.amq1 !== req.body.anime && !song.anime.amq2) {
+      song.anime.amq2 = req.body.anime;
+      updated = true;
+    }
+    // add songlink if new
+    if (!song.songLink.includes(req.body.songLink)) {
+      song.songLink.push(req.body.songLink);
+      updated = true;
+    }
+    if (updated) {
+      song = await song.save();
+    }
+  }
+  return song;
+}
+
 routes.route('/updateProgress').post(async (req, res) => {
   try {
-    const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
-    // get song, insert if not found
-    let song = await Song.findOne({ uid: uid });
-    if (!song) {
-      // couldn't find song, search for it on anilist
-      titles = await searchAnilist(req.body.anime);
-      const newSong = new Song({
-        uid,
-        songName: req.body.songName,
-        anime: {
-          english: titles.english,
-          romaji: titles.romaji,
-          native: titles.native,
-          amq1: req.body.anime
-        },
-        songArtist: req.body.songArtist,
-        songType: req.body.songType,
-        songLink: [req.body.songLink]
-      });
-      song = await newSong.save();
-    } else {
-      let updated = false;
-      // check for 2nd amq anime title (english or romaji)
-      if (song.anime.amq1 !== req.body.anime && !song.anime.amq2) {
-        song.anime.amq2 = req.body.anime;
-        updated = true;
-      }
-      // add songlink if new
-      if (!song.songLink.includes(req.body.songLink)) {
-        song.songLink.push(req.body.songLink);
-        updated = true;
-      }
-      if (updated) {
-        song = song.save();
-      }
-    }
-
-    // update user progress
+    // Get song
+    const song = await getSong(req);
+    // Get user
     let user = await User.findOne({ username: req.body.username });
     if (!user) {
       user = new User({ username: req.body.username })
       user.save();
     }
+    // Upsert progress
     let progress = await Progress.findOne({ userId: mongoose.Types.ObjectId(user._id), songId: mongoose.Types.ObjectId(song._id) });
     if (!progress) {
       progress = new Progress({

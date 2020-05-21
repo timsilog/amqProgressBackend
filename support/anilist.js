@@ -2,7 +2,7 @@ require('dotenv').config()
 const fetch = require("node-fetch");
 const readline = require('readline');
 const mongoose = require('mongoose');
-const Song = require('./models/song');
+const Song = require('../models/song');
 
 const searchAnilist = async (anime) => {
   // Here we define our query as a multi-line string

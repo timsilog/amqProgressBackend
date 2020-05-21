@@ -1,4 +1,5 @@
 require('dotenv').config()
+const crypto = require('crypto');
 const express = require('express');
 const routes = express.Router();
 const app = express();
@@ -7,7 +8,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const songRouter = require('./routes/songRoute');
 const progressRouter = require('./routes/progressRoute');
-const { searchAnilist } = require('./anilist');
+const { searchAnilist } = require('./support/anilist');
 const Song = require('./models/song');
 const User = require('./models/user');
 const Progress = require('./models/progress');
@@ -44,45 +45,54 @@ routes.route('/user').get(async (req, res) => {
   }
 })
 
+
 /* body {
   username: string,
   anime: string,
   isCorrect: boolean,
   songName: string,
   songType: string,
-  songLink: string
+  songLink: string,
+  songArtist: string,
+  guess: string
 } */
 routes.route('/updateProgress').post(async (req, res) => {
   try {
+    const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
     // get song, insert if not found
-    let song = await Song.findOne({
-      $or: [
-        { anime: { english: req.body.anime } },
-        { anime: { romaji: req.body.anime } }
-      ],
-      songName: req.body.songName,
-      songType: req.body.songType
-    });
+    let song = await Song.findOne({ uid: uid });
     if (!song) {
       // couldn't find song, search for it on anilist
       titles = await searchAnilist(req.body.anime);
       const newSong = new Song({
+        uid,
         songName: req.body.songName,
         anime: {
           english: titles.english,
           romaji: titles.romaji,
           native: titles.native,
-          amq: req.body.anime
+          amq1: req.body.anime
         },
+        songArtist: req.body.songArtist,
         songType: req.body.songType,
         songLink: [req.body.songLink]
       });
       song = await newSong.save();
-    }
-    // add songlink if new
-    if (!song.songLink.includes(req.body.songLink)) {
-      song.songLink.push(req.body.songLink);
-      song = song.save();
+    } else {
+      let updated = false;
+      // check for 2nd amq anime title (english or romaji)
+      if (song.anime.amq1 !== req.body.anime && !song.anime.amq2) {
+        song.anime.amq2 = req.body.anime;
+        updated = true;
+      }
+      // add songlink if new
+      if (!song.songLink.includes(req.body.songLink)) {
+        song.songLink.push(req.body.songLink);
+        updated = true;
+      }
+      if (updated) {
+        song = song.save();
+      }
     }
 
     // update user progress
@@ -91,7 +101,7 @@ routes.route('/updateProgress').post(async (req, res) => {
       user = new User({ username: req.body.username })
       user.save();
     }
-    let progress = await Progress.findOne({ userId: user._id, songId: song._id });
+    let progress = await Progress.findOne({ userId: mongoose.Types.ObjectId(user._id), songId: mongoose.Types.ObjectId(song._id) });
     if (!progress) {
       progress = new Progress({
         userId: user._id,

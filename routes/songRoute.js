@@ -8,7 +8,7 @@ const Song = require('../models/song');
 router.get('/', async (req, res) => {
   try {
     const songs = await Song
-      .find(req.query.songName ? { songName: req.query.songName } : {})
+      .find(req.query.songname ? { songName: req.query.songname } : {})
       .limit(50)
       .skip(req.query.offset ? parseInt(req.query.offset) : 0);
     res.send({ songs });

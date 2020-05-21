@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const songSchema = new mongoose.Schema({
+  uid: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   songName: {
     type: String,
     required: true

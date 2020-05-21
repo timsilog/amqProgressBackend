@@ -85,9 +85,9 @@ const getSong = async (req) => {
       if (e.code === 11000) {
         // there was a duplicate
         console.log('-----------TRYING AGAIN-------------')
-        return getSong();
+        return getSong(req);
       } else {
-        console.log(e.message);
+        // console.log(e.message);
         throw e;
       }
     }
@@ -151,7 +151,7 @@ routes.route('/updateProgress').post(async (req, res) => {
       song
     })
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).send({ error: err.message });
   }
 })

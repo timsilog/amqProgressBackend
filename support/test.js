@@ -17,12 +17,11 @@ db.on('error', (error) => console.error(`Db error: ${error}`));
 db.once('open', () => console.log('Connected to Database'));
 
 const main = async () => {
-  const users = await User.find();
-  for (const user of users) {
-    user.displayName = user.username;
-    user.username = user.username.toLowerCase();
-    const result = await user.save();
-    console.log(result);
+  const songs = await Song.find();
+  for (const song of songs) {
+    if (song.songArtist) {
+      console.log(song);
+    }
   }
   // return await findDupeSongs();
   // return await viewDupes();

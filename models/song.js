@@ -10,6 +10,10 @@ const songSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  songArtist: {
+    type: String,
+    required: true
+  },
   anime: {
     english: String,
     romaji: String,

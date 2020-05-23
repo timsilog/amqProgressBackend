@@ -123,6 +123,7 @@ routes.route('/updateProgress').post(async (req, res) => {
     let progress = await Progress.findOne({ userId: mongoose.Types.ObjectId(user._id), songId: mongoose.Types.ObjectId(song._id) });
     if (!progress) {
       progress = new Progress({
+        lastSeen: new Date(),
         userId: user._id,
         songId: song._id,
         hits: req.body.isCorrect ? 1 : 0,

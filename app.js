@@ -57,7 +57,6 @@ routes.route('/user').get(async (req, res) => {
   songArtist: string,
   guess: string
 } */
-
 const getSong = async (req) => {
   const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
   // get song, insert if not found

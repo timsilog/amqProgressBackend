@@ -151,7 +151,7 @@ routes.route('/updateProgress').post(async (req, res) => {
       song
     })
   } catch (err) {
-    // console.log(err);
+    console.error(err.message);
     res.status(500).send({ error: err.message });
   }
 })

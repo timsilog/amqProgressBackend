@@ -40,9 +40,9 @@ const searchAnilist = async (anime) => {
 
   // Make the HTTP Api request
   try {
-    console.log("attempting query")
+    // console.log("attempting query")
     const response = await fetch(url, options);
-    console.log("got result")
+    // console.log("got result")
     const media = await response.json()
     return media.data.Media.title;
   } catch (err) {

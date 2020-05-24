@@ -61,7 +61,6 @@ const getSong = async (req) => {
   const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
   // get song, insert if not found
   let song = await Song.findOne({ uid: uid });
-  console.log(song);
   if (!song) {
     // couldn't find song, search for it on anilist
     titles = await searchAnilist(req.body.anime);

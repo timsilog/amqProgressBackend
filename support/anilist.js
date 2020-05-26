@@ -50,6 +50,7 @@ const searchAnilist = async (anime) => {
   }
 }
 
+// Update a song with the correct anime
 const updateSongAnime = async (searchTerm, updateId) => {
   mongoose.connect(process.env.MONGO_URI,
     {

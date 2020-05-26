@@ -85,7 +85,6 @@ const getSong = async (req) => {
         console.log('-----------TRYING AGAIN-------------')
         return getSong(req);
       } else {
-        // console.log(e.message);
         throw e;
       }
     }
@@ -98,7 +97,11 @@ const getSong = async (req) => {
     }
     // add songlink if new
     if (!song.songLink.includes(req.body.songLink)) {
-      song.songLink.push(req.body.songLink);
+      if (song.songLink.includes('.webm')) {
+        song.songLink = [req.body.songLink, ...song.songLink]
+      } else {
+        song.songLink.push(req.body.songLink);
+      }
       updated = true;
     }
     if (updated) {
@@ -113,9 +116,9 @@ routes.route('/updateProgress').post(async (req, res) => {
     // Get song
     const song = await getSong(req);
     // Get user
-    let user = await User.findOne({ username: req.body.username });
+    let user = await User.findOne({ username: req.body.username.toLowerCase() });
     if (!user) {
-      user = new User({ username: req.body.username })
+      user = new User({ username: req.body.username.toLowerCase(), displayName: req.body.username })
       user.save();
     }
     // Upsert progress

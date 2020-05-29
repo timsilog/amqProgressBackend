@@ -6,6 +6,10 @@ GET http://localhost:4000/progress?username=timsilog
 
 ###
 
+GET http://localhost:4000/users?username=rOBk34c
+
+###
+
 GET https://serene-temple-88689.herokuapp.com/progress?username=timsilog
 
 ###

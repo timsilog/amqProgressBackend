@@ -8,6 +8,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const songRouter = require('./routes/songRoute');
 const progressRouter = require('./routes/progressRoute');
+const userRouter = require('./routes/userRoute');
 const { searchAnilist } = require('./support/anilist');
 const Song = require('./models/song');
 const User = require('./models/user');
@@ -31,21 +32,11 @@ app.use(helmet());
 app.use('/', routes);
 app.use('/songs', songRouter);
 app.use('/progress', progressRouter);
+app.use('/users', userRouter);
 
 routes.route('/').get((req, res) => {
   res.send('hello world');
 })
-
-routes.route('/user').get(async (req, res) => {
-  try {
-    const user = await User.findOne({ username: req.query.username })
-    // const user = (await (await db.collection('users').find({ username: req.query.username })).toArray())[0];
-    res.send(user);
-  } catch (e) {
-    res.status(500).send({ error: e.message })
-  }
-})
-
 
 /* body {
   username: string,

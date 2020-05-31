@@ -1,8 +1,8 @@
-GET http://localhost:4000/progress?username=timsilog&offset=50
+GET http://localhost:4000/progress?username=third1mpact&offset=500
 
 ###
 
-GET http://localhost:4000/progress?username=timsilog
+GET http://localhost:4000/progress?username=robk34c
 
 ###
 

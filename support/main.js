@@ -24,8 +24,30 @@ const main = async () => {
   // updateSongAnime(searchTerm, updateId);
 
   // sort and remove all dupe video and mp3 links
-  return reorderAndRemoveDupeSongs();
-
+  // return reorderAndRemoveDupeSongs();
+  const progresses = (await Progress.find());
+  const res = [];
+  for (const progress of progresses) {
+    // let flag = false;
+    // if (progress.correctGuesses) {
+    //   progress.correctGuessesOld = progress.correctGuesses;
+    //   delete progress.correctGuesses;
+    //   flag = true;
+    // }
+    // if (progress.incorrectGuesses) {
+    //   progress.incorrectGuessesOld = progress.incorrectGuesses;
+    //   delete progress.incorrectGuesses;
+    //   flag = true;
+    // }
+    // if (flag) {
+    //   console.log(progress);
+    progress.correctGuesses = {};
+    progress.incorrectGuesses = {};
+    console.log(progress);
+    res.push(await progress.save());
+    // }
+  }
+  return res;
   // return await findDupeSongs();
   // return await viewDupes();
   // return await removeDupes();

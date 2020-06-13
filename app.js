@@ -121,19 +121,24 @@ routes.route('/updateProgress').post(async (req, res) => {
         songId: song._id,
         hits: req.body.isCorrect ? 1 : 0,
         misses: req.body.isCorrect ? 0 : 1,
-        correctGuesses: req.body.isCorrect ? [req.body.guess] : [],
-        incorrectGuesses: req.body.isCorrect ? [] : [req.body.guess]
+        correctGuesses: req.body.isCorrect ? { [req.body.guess]: 1 } : {},
+        incorrectGuesses: req.body.isCorrect ? {} : { [req.body.guess]: 1 }
       });
     } else {
+      progress.lastSeen = new Date();
       if (req.body.isCorrect) {
         progress.hits++;
-        if (!progress.correctGuesses.includes(req.body.guess)) {
-          progress.correctGuesses.push(req.body.guess);
+        if (!progress.correctGuesses[req.body.guess]) {
+          progress.correctGuesses[req.body.guess] = 1;
+        } else {
+          progress.correctGuesses[req.body.guess]++;
         }
       } else {
         progress.misses++;
-        if (!progress.incorrectGuesses.includes(req.body.guess)) {
-          progress.incorrectGuesses.push(req.body.guess);
+        if (!progress.incorrectGuesses[req.body.guess]) {
+          progress.incorrectGuesses[req.body.guess] = 1;
+        } else {
+          progress.incorrectGuesses[req.body.guess]++;
         }
       }
     }

@@ -14,8 +14,6 @@ const progressSchema = new mongoose.Schema({
   misses: Number,
   correctGuesses: Map,
   incorrectGuesses: Map,
-  correctGuessesOld: [String],
-  incorrectGuessesOld: [String]
 });
 
 module.exports = mongoose.model('Progress', progressSchema);

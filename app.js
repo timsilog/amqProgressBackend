@@ -114,6 +114,7 @@ routes.route('/updateProgress').post(async (req, res) => {
     }
     // Upsert progress
     let progress = await Progress.findOne({ userId: mongoose.Types.ObjectId(user._id), songId: mongoose.Types.ObjectId(song._id) });
+    const guessHash = crypto.createHash('sha1').update(`${req.body.guess}`).digest('hex');
     if (!progress) {
       progress = new Progress({
         lastSeen: new Date(),
@@ -121,24 +122,44 @@ routes.route('/updateProgress').post(async (req, res) => {
         songId: song._id,
         hits: req.body.isCorrect ? 1 : 0,
         misses: req.body.isCorrect ? 0 : 1,
-        correctGuesses: req.body.isCorrect ? { [req.body.guess]: 1 } : {},
-        incorrectGuesses: req.body.isCorrect ? {} : { [req.body.guess]: 1 }
+        correctGuesses: req.body.isCorrect
+          ? {
+            [guessHash]: {
+              guess: req.body.guess,
+              count: 1
+            }
+          }
+          : {},
+        incorrectGuesses: req.body.isCorrect
+          ? {}
+          : {
+            [guessHash]: {
+              guess: req.body.guess,
+              count: 1
+            }
+          }
       });
     } else {
       progress.lastSeen = new Date();
       if (req.body.isCorrect) {
         progress.hits++;
-        if (!progress.correctGuesses[req.body.guess]) {
-          progress.correctGuesses[req.body.guess] = 1;
+        if (!progress.correctGuesses[guessHash]) {
+          progress.correctGuesses.set(guessHash, {
+            guess: req.body.guess,
+            count: 1
+          });
         } else {
-          progress.correctGuesses[req.body.guess]++;
+          progress.correctGuesses.guessHash.set(count, progress.correctGuesses.guessHash.count + 1);
         }
       } else {
         progress.misses++;
-        if (!progress.incorrectGuesses[req.body.guess]) {
-          progress.incorrectGuesses[req.body.guess] = 1;
+        if (!progress.incorrectGuesses[guessHash]) {
+          progress.incorrectGuesses.set(guessHash, {
+            guess: req.body.guess,
+            count: 1
+          });
         } else {
-          progress.incorrectGuesses[req.body.guess]++;
+          progress.incorrectGuesses.guessHash.set(count, progress.incorrectGuesses.guessHash.count + 1);
         }
       }
     }

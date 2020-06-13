@@ -43,7 +43,7 @@ const main = async () => {
     //   console.log(progress);
     progress.correctGuesses = {};
     progress.incorrectGuesses = {};
-    console.log(progress);
+    // console.log(progress);
     res.push(await progress.save());
     // }
   }

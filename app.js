@@ -112,6 +112,7 @@ routes.route('/updateProgress').post(async (req, res) => {
       user = new User({ username: req.body.username.toLowerCase(), displayName: req.body.username })
       user.save();
     }
+    console.log(user);
     // Upsert progress
     let progress = await Progress.findOne({ userId: mongoose.Types.ObjectId(user._id), songId: mongoose.Types.ObjectId(song._id) });
     const guessHash = crypto.createHash('sha1').update(`${req.body.guess}`).digest('hex');

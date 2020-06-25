@@ -5,7 +5,7 @@ const Progress = require('../models/progress');
 const User = require('../models/user');
 
 // based on offset
-// get 200 progress based on provided username
+// get 1000 progress based on provided username
 // if no username is provided just query for all progress
 router.get('/', async (req, res) => {
   try {
@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
       {
         $facet: {
           paginatedResults: [
-            { $limit: req.query.offset ? parseInt(req.query.offset) + 200 : 200 },
+            { $limit: req.query.offset ? parseInt(req.query.offset) + 1000 : 1000 },
             { $skip: req.query.offset ? parseInt(req.query.offset) : 0 }
           ],
           totalCount: [

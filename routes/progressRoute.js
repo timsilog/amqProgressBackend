@@ -6,13 +6,19 @@ const User = require('../models/user');
 
 // based on offset
 // get 1000 progress based on provided username
-// if no username is provided just query for all progress
+// if no username is provided just query for all progress (up to limit)
+/* QUERY
+  username?: string // amq username
+  offset?: string   // where to start query
+  limit?: string    // how many to return (defaults to 500)
+ */
 router.get('/', async (req, res) => {
   try {
     const user = await User.findOne({ username: req.query.username });
     if (req.query.username && !user) {
       return res.send([]);
     }
+    const limit = req.query.limit ? parseInt(req.query.limit) : 500;
     const progress = await Progress.aggregate([
       {
         $match: {
@@ -30,7 +36,7 @@ router.get('/', async (req, res) => {
       {
         $facet: {
           paginatedResults: [
-            { $limit: req.query.offset ? parseInt(req.query.offset) + 1000 : 1000 },
+            { $limit: req.query.offset ? parseInt(req.query.offset) + limit : limit },
             { $skip: req.query.offset ? parseInt(req.query.offset) : 0 }
           ],
           totalCount: [

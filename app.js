@@ -38,16 +38,6 @@ routes.route('/').get((req, res) => {
   res.send('hello world');
 })
 
-/* body {
-  username: string,
-  anime: string,
-  isCorrect: boolean,
-  songName: string,
-  songType: string,
-  songLink: string,
-  songArtist: string,
-  guess: string
-} */
 const getSong = async (req) => {
   const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
   // get song, insert if not found
@@ -102,6 +92,16 @@ const getSong = async (req) => {
   return song;
 }
 
+/* body {
+  username: string,
+  anime: string,
+  isCorrect: boolean,
+  songName: string,
+  songType: string,
+  songLink: string,
+  songArtist: string,
+  guess: string
+} */
 routes.route('/updateProgress').post(async (req, res) => {
   try {
     // Get song
@@ -112,7 +112,6 @@ routes.route('/updateProgress').post(async (req, res) => {
       user = new User({ username: req.body.username.toLowerCase(), displayName: req.body.username })
       user.save();
     }
-    console.log(user);
     // Upsert progress
     let progress = await Progress.findOne({ userId: mongoose.Types.ObjectId(user._id), songId: mongoose.Types.ObjectId(song._id) });
     const guessHash = crypto.createHash('sha1').update(`${req.body.guess}`).digest('hex');
@@ -144,23 +143,31 @@ routes.route('/updateProgress').post(async (req, res) => {
       progress.lastSeen = new Date();
       if (req.body.isCorrect) {
         progress.hits++;
-        if (!progress.correctGuesses[guessHash]) {
+        const current = progress.correctGuesses.get(guessHash);
+        if (!current) {
           progress.correctGuesses.set(guessHash, {
             guess: req.body.guess,
             count: 1
           });
         } else {
-          progress.correctGuesses.guessHash.set(count, progress.correctGuesses.guessHash.count + 1);
+          progress.correctGuesses.set(guessHash, {
+            guess: current.guess,
+            count: current.count + 1
+          });
         }
       } else {
         progress.misses++;
-        if (!progress.incorrectGuesses[guessHash]) {
+        const current = progress.incorrectGuesses.get(guessHash);
+        if (!current) {
           progress.incorrectGuesses.set(guessHash, {
             guess: req.body.guess,
             count: 1
           });
         } else {
-          progress.incorrectGuesses.guessHash.set(count, progress.incorrectGuesses.guessHash.count + 1);
+          progress.incorrectGuesses.set(guessHash, {
+            guess: current.guess,
+            count: current.count + 1
+          });
         }
       }
     }

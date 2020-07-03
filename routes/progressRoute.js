@@ -14,7 +14,7 @@ const User = require('../models/user');
  */
 router.get('/', async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.query.username });
+    const user = await User.findOne({ username: req.query.username.toLowerCase() });
     if (req.query.username && !user) {
       return res.send([]);
     }

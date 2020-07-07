@@ -9,8 +9,6 @@ const helmet = require('helmet');
 const songRouter = require('./routes/songRoute');
 const progressRouter = require('./routes/progressRoute');
 const userRouter = require('./routes/userRoute');
-const { searchAnilist } = require('./support/anilist');
-const Song = require('./models/song');
 const User = require('./models/user');
 const Progress = require('./models/progress');
 
@@ -38,61 +36,9 @@ routes.route('/').get((req, res) => {
   res.send('hello world');
 })
 
-const getSong = async (req) => {
-  const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
-  // get song, insert if not found
-  let song = await Song.findOne({ uid: uid });
-  if (!song) {
-    // couldn't find song, search for it on anilist
-    titles = await searchAnilist(req.body.anime);
-    const newSong = new Song({
-      uid,
-      songName: req.body.songName,
-      anime: {
-        english: titles.english,
-        romaji: titles.romaji,
-        native: titles.native,
-        amq1: req.body.anime
-      },
-      songArtist: req.body.songArtist,
-      songType: req.body.songType,
-      songLink: [req.body.songLink]
-    });
-    try {
-      song = await newSong.save();
-    } catch (e) {
-      if (e.code === 11000) {
-        // there was a duplicate
-        console.log('-----------TRYING AGAIN-------------')
-        return getSong(req);
-      } else {
-        throw e;
-      }
-    }
-  } else {
-    let updated = false;
-    // check for 2nd amq anime title (english or romaji)
-    if (song.anime.amq1 !== req.body.anime && !song.anime.amq2) {
-      song.anime.amq2 = req.body.anime;
-      updated = true;
-    }
-    // add songlink if new
-    if (!song.songLink.includes(req.body.songLink)) {
-      if (song.songLink.includes('.webm')) {
-        song.songLink = [req.body.songLink, ...song.songLink]
-      } else {
-        song.songLink.push(req.body.songLink);
-      }
-      updated = true;
-    }
-    if (updated) {
-      song = await song.save();
-    }
-  }
-  return song;
-}
-
-/* body {
+// DELETE LATER. MOVING TO PROGRESS ROUTE.
+// Need to update chrome extension first.
+/* BODY
   username: string,
   anime: string,
   isCorrect: boolean,
@@ -101,7 +47,7 @@ const getSong = async (req) => {
   songLink: string,
   songArtist: string,
   guess: string
-} */
+*/
 routes.route('/updateProgress').post(async (req, res) => {
   try {
     // Get song
@@ -182,6 +128,60 @@ routes.route('/updateProgress').post(async (req, res) => {
     res.status(500).send({ error: err.message });
   }
 })
+
+const getSong = async (req) => {
+  const uid = crypto.createHash('sha1').update(`${req.body.songName}${req.body.songArtist}${req.body.songType}`).digest('hex');
+  // get song, insert if not found
+  let song = await Song.findOne({ uid: uid });
+  if (!song) {
+    // couldn't find song, search for it on anilist
+    titles = await searchAnilist(req.body.anime);
+    const newSong = new Song({
+      uid,
+      songName: req.body.songName,
+      anime: {
+        english: titles.english,
+        romaji: titles.romaji,
+        native: titles.native,
+        amq1: req.body.anime
+      },
+      songArtist: req.body.songArtist,
+      songType: req.body.songType,
+      songLink: [req.body.songLink]
+    });
+    try {
+      song = await newSong.save();
+    } catch (e) {
+      if (e.code === 11000) {
+        // there was a duplicate
+        console.log('-----------TRYING AGAIN-------------')
+        return getSong(req);
+      } else {
+        throw e;
+      }
+    }
+  } else {
+    let updated = false;
+    // check for 2nd amq anime title (english or romaji)
+    if (song.anime.amq1 !== req.body.anime && !song.anime.amq2) {
+      song.anime.amq2 = req.body.anime;
+      updated = true;
+    }
+    // add songlink if new
+    if (!song.songLink.includes(req.body.songLink)) {
+      if (song.songLink.includes('.webm')) {
+        song.songLink = [req.body.songLink, ...song.songLink]
+      } else {
+        song.songLink.push(req.body.songLink);
+      }
+      updated = true;
+    }
+    if (updated) {
+      song = await song.save();
+    }
+  }
+  return song;
+}
 
 app.listen(process.env.PORT, () => {
   // console.log(`Listening on port: ${process.env.PORT}`)

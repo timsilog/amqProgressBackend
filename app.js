@@ -9,7 +9,7 @@ const helmet = require('helmet');
 const songRouter = require('./routes/songRoute');
 const progressRouter = require('./routes/progressRoute');
 const userRouter = require('./routes/userRoute');
-const Song = require('../models/song');
+const Song = require('./models/song');
 const User = require('./models/user');
 const Progress = require('./models/progress');
 

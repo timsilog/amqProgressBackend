@@ -20,7 +20,7 @@ const User = require('../models/user');
  */
 router.get('/', async (req, res) => {
   try {
-    const match = {};
+    let match = {};
     const method = req.query.method ? req.query.method : null;
     if (method === 'username') {
       if (!req.query.username) {

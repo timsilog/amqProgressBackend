@@ -9,9 +9,17 @@ const helmet = require('helmet');
 const songRouter = require('./routes/songRoute');
 const progressRouter = require('./routes/progressRoute');
 const userRouter = require('./routes/userRoute');
+const accountRouter = require('./routes/accountRoute');
 const Song = require('./models/song');
 const User = require('./models/user');
 const Progress = require('./models/progress');
+
+// Passport stuff
+const passport = require('passport');
+// Passport middleware
+app.use(passport.initialize());
+// Passport config
+require('./config/passport')(passport);
 
 mongoose.connect(process.env.MONGO_URI,
   {
@@ -32,6 +40,7 @@ app.use('/', routes);
 app.use('/songs', songRouter);
 app.use('/progress', progressRouter);
 app.use('/users', userRouter);
+app.use('/accounts', accountRouter);
 
 routes.route('/').get((req, res) => {
   res.send('hello world');

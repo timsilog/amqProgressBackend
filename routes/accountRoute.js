@@ -20,11 +20,10 @@ router.post("/register", (req, res) => {
       { username: req.body.username.toLowerCase() }]
   }).then(account => {
     if (account) {
-      console.log(account);
       if (account.email === req.body.email.toLowerCase()) {
-        return res.status(400).json({ email: "Email already exists" });
+        return res.status(400).json({ email: " already exists" });
       } else {
-        return res.status(400).json({ username: "Username already exists" });
+        return res.status(400).json({ username: " already exists" });
       }
     } else {
       const newAccount = new Account({
@@ -53,7 +52,7 @@ router.post("/login", (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
   // Check validation
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.status(401).json(errors);
   }
   // Find account by email
   Account.findOne({
@@ -64,7 +63,7 @@ router.post("/login", (req, res) => {
   }).then(account => {
     // Check if account exists
     if (!account) {
-      return res.status(404).json({ accountNotFound: "Account not found" });
+      return res.status(404).json({ accountNotFound: " not found" });
     }
     // Check password
     bcrypt.compare(req.body.password, account.pw).then(isMatch => {
@@ -91,8 +90,8 @@ router.post("/login", (req, res) => {
         );
       } else {
         return res
-          .status(400)
-          .json({ passwordIncorrect: "Password incorrect" });
+          .status(401)
+          .json({ passwordIncorrect: " incorrect" });
       }
     });
   });

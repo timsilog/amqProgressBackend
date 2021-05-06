@@ -20,6 +20,10 @@ const accountSchema = new mongoose.Schema({
   displayName: {
     type: String
   },
+  isConfirmed: {
+    type: Boolean,
+    default: false
+  }
 });
 
 module.exports = mongoose.model('Account', accountSchema);
